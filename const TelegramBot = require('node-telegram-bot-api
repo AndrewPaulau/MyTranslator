@@ -1,0 +1,33 @@
+const TelegramBot = require('node-telegram-bot-api');
+const translate = require('@vitalets/google-translate-api');
+
+// Замените 'YOUR_TOKEN' на токен вашего бота
+const token = 'YOUR_TOKEN';
+const bot = new TelegramBot(token, { polling: true });
+
+// Обработка команды /start
+bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, 'Привет! Я бот-переводчик. Отправь мне текст для перевода.');
+});
+
+// Обработка текстовых сообщений
+bot.on('message', (msg) => {
+    const chatId = msg.chat.id;
+
+    // Игнорируем команды
+    if (msg.text.startsWith('/')) {
+        return;
+    }
+
+    // Переводим текст
+    translate(msg.text, { to: 'ru' }) // Измените 'ru' на нужный язык
+        .then(res => {
+            bot.sendMessage(chatId, `Перевод: ${res.text}`);
+        })
+        .catch(err => {
+            console.error(err);
+            bot.sendMessage(chatId, 'Произошла ошибка при переводе.');
+        });
+});
+
